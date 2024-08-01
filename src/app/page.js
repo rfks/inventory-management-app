@@ -33,6 +33,7 @@ export default function Home() {
   const [inventory, setInventory] = useState([])
   const [open, setOpen] = useState(false)
   const [itemName, setItemName] = useState('')
+
   const updateInventory = async () => {
     const snapshot = query(collection(firestore, 'inventory'))
     const docs = await getDocs(snapshot)
@@ -146,15 +147,22 @@ export default function Home() {
               bgcolor={'#f0f0f0'}
               paddingX={5}
             >
-              <Typography variant={'h3'} color={'#333'} textAlign={'center'}>
-                {name.charAt(0).toUpperCase() + name.slice(1)}
-              </Typography>
-              <Typography variant={'h3'} color={'#333'} textAlign={'center'}>
-                Quantity: {quantity}
-              </Typography>
-              <Button variant="contained" onClick={() => removeItem(name)}>
-                Remove
+              <Button variant='text' onClick={handleOpen}>
+                <Typography variant={'h3'} color={'#333'} textAlign={'center'}>
+                  {name.charAt(0).toUpperCase() + name.slice(1)}
+                </Typography>
               </Button>
+              <Stack direction='row' spacing={2} alignItems={'center'}>
+                <Button variant="text" onClick={() => removeItem(name)}>
+                  <Typography variant={'h3'}>-</Typography>
+                </Button>
+                <Typography variant={'h3'} color={'#333'} textAlign={'center'} justifyContent={'center'}>
+                  {quantity}
+                </Typography>
+                <Button variant="text" onClick={() => addItem(name)}>
+                  <Typography variant={'h3'}>+</Typography>
+                </Button>
+              </Stack>
             </Box>
           ))}
         </Stack>
