@@ -12,11 +12,11 @@ const firebaseConfig = {
   authDomain: process.env.AUTHDOMAIN,
   projectId: process.env.PROJECTID,
   storageBucket: process.env.STORAGEBUCKET,
-  messagingSenderId: process.env.MESSAGESENDERID,
+  messagingSenderId: process.env.MESSAGINGSENDERID,
   appId: process.env.APPID,
   measurementId: process.env.MEASUREMENTID
 };
-console.log('ENV: ',firebaseConfig.apiKey)
+console.log('ENV: ',firebaseConfig)
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 // const analytics = getAnalytics(app);
