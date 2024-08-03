@@ -33,6 +33,7 @@ export default function Home() {
   const [inventory, setInventory] = useState([])
   const [open, setOpen] = useState(false)
   const [itemName, setItemName] = useState('')
+  const [search, setSearch] = useState('')
 
   const updateInventory = async () => {
     const snapshot = query(collection(firestore, 'inventory'))
@@ -73,6 +74,12 @@ export default function Home() {
     }
     await updateInventory()
   }
+
+  const updateItem = async (item) => {
+    
+  }
+
+  const filteredInventory = inventory.filter((item) => item.name.toLowerCase().includes(search.toLowerCase()))
 
   const handleOpen = () => setOpen(true)
   const handleClose = () => setOpen(false)
@@ -119,9 +126,18 @@ export default function Home() {
           </Stack>
         </Box>
       </Modal>
-      <Button variant="contained" onClick={handleOpen}>
-        Add New Item
-      </Button>
+      <Stack alignContent={'center'}  direction={'row'} spacing={2}>
+        <Button variant="contained" onClick={handleOpen}>
+          Add New
+        </Button>
+        <TextField
+          placeholder="Search..."
+          value={search}
+          fullWidth
+          onChange={(e) => setSearch(e.target.value)}
+        >
+        </TextField>
+      </Stack>
       <Box border={'1px solid #333'}>
         <Box
           width="800px"
@@ -132,34 +148,38 @@ export default function Home() {
           alignItems={'center'}
         >
           <Typography variant={'h2'} color={'#333'} textAlign={'center'}>
-            Inventory Items
+            Inventory
           </Typography>
         </Box>
-        <Stack width="800px" height="300px" spacing={2} overflow={'auto'}>
-          {inventory.map(({name, quantity}) => (
+        <Stack width="800px" height="300px" spacing={1} overflow={'auto'}>
+          {filteredInventory.map(({name, quantity}) => (
             <Box
               key={name}
               width="100%"
-              minHeight="150px"
+              minHeight="80px"
               display={'flex'}
               justifyContent={'space-between'}
               alignItems={'center'}
               bgcolor={'#f0f0f0'}
-              paddingX={5}
+              paddingX={1}
             >
-              <Button variant='text' onClick={handleOpen}>
-                <Typography variant={'h3'} color={'#333'} textAlign={'center'}>
-                  {name.charAt(0).toUpperCase() + name.slice(1)}
-                </Typography>
-              </Button>
+                              {/*Typography variant={'h3'} color={'#333'} textAlign={'center'} */}
+              <TextField 
+                  value={name}
+                  variant="filled"
+                  fullWidth
+                  
+                />
+
               <Stack direction='row' spacing={2} alignItems={'center'}>
-                <Button variant="text" onClick={() => removeItem(name)}>
+
+                <Button variant="contained" color="error" onClick={() => removeItem(name)}>
                   <Typography variant={'h3'}>-</Typography>
                 </Button>
                 <Typography variant={'h3'} color={'#333'} textAlign={'center'} justifyContent={'center'}>
                   {quantity}
                 </Typography>
-                <Button variant="text" onClick={() => addItem(name)}>
+                <Button variant="contained" color="success" onClick={() => addItem(name)}>
                   <Typography variant={'h3'}>+</Typography>
                 </Button>
               </Stack>
