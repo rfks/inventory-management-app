@@ -29,11 +29,13 @@ const style = {
 }
 
 export default function Home() {
-  //We'll add our component logic here
   const [inventory, setInventory] = useState([])
   const [open, setOpen] = useState(false)
   const [itemName, setItemName] = useState('')
   const [search, setSearch] = useState('')
+  const [openEdit, setOpenEdit] = useState(false)
+  const [prevItem,setPrevItem] = useState('')
+  const [count,setCount] = useState(0)
 
   const updateInventory = async () => {
     const snapshot = query(collection(firestore, 'inventory'))
@@ -49,14 +51,14 @@ export default function Home() {
     updateInventory()
   }, [])
 
-  const addItem = async (item) => {
+  const addItem = async (item,count) => {
     const docRef = doc(collection(firestore, 'inventory'), item)
     const docSnap = await getDoc(docRef)
     if (docSnap.exists()) {
       const { quantity } = docSnap.data()
-      await setDoc(docRef, {quantity: quantity + 1 })
+      await setDoc(docRef, {quantity: quantity + count })
     } else {
-      await setDoc(docRef, { quantity: 1 })
+      await setDoc(docRef, { quantity: count })
     }
     await updateInventory()
   }
@@ -75,14 +77,35 @@ export default function Home() {
     await updateInventory()
   }
 
-  const updateItem = async (item) => {
-    
+  const removeAllItem = async (item) => {
+    const docRef = doc(collection(firestore, 'inventory'), item)
+    const docSnap = await getDoc(docRef)
+    if (docSnap.exists()) {
+        await deleteDoc(docRef)
+      }
+    await updateInventory()
+  }
+
+  const updateItem = (item,count) => {
+    setItemName(item)
+    setPrevItem(item)
+    setCount(count)
+    handleOpenEdit()
+  }
+
+  const saveItem = () => {
+    if (prevItem != itemName){
+      addItem(itemName,count)
+      removeAllItem(prevItem)
+    }
   }
 
   const filteredInventory = inventory.filter((item) => item.name.toLowerCase().includes(search.toLowerCase()))
 
   const handleOpen = () => setOpen(true)
   const handleClose = () => setOpen(false)
+  const handleOpenEdit = () => setOpenEdit(true)
+  const handleCloseEdit = () => setOpenEdit(false)
 
   return (
     <Box
@@ -116,12 +139,45 @@ export default function Home() {
             <Button
               variant="outlined"
               onClick={() => {
-                addItem(itemName)
+                addItem(itemName,1)
                 setItemName('')
                 handleClose()
               }}
             >
               Add
+            </Button>
+          </Stack>
+        </Box>
+      </Modal>
+       {/* ***********************Modal for edit**************************** */}
+      <Modal
+        open={openEdit}
+        onClose={handleCloseEdit}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={style}>
+          <Typography id="modal-modal-title" variant="h6" component="h2">
+            Edit Item
+          </Typography>
+          <Stack width="100%" direction={'row'} spacing={2}>
+            <TextField
+              id="outlined-basic"
+              label="Item"
+              variant="outlined"
+              fullWidth
+              value={itemName}
+              onChange={(e) => setItemName(e.target.value)}
+            />
+            <Button
+              variant="outlined"
+              onClick={() => {
+                saveItem(itemName)
+                setItemName('')
+                handleCloseEdit()
+              }}
+            >
+              Save
             </Button>
           </Stack>
         </Box>
@@ -135,8 +191,7 @@ export default function Home() {
           value={search}
           fullWidth
           onChange={(e) => setSearch(e.target.value)}
-        >
-        </TextField>
+        />
       </Stack>
       <Box border={'1px solid #333'}>
         <Box
@@ -163,13 +218,9 @@ export default function Home() {
               bgcolor={'#f0f0f0'}
               paddingX={1}
             >
-                              {/*Typography variant={'h3'} color={'#333'} textAlign={'center'} */}
-              <TextField 
-                  value={name}
-                  variant="filled"
-                  fullWidth
-                  
-                />
+                <Typography onClick={() => updateItem(name,quantity)} variant={'h3'} color={'#333'} textAlign={'center'} justifyContent={'center'}>
+                  {name}
+                </Typography>
 
               <Stack direction='row' spacing={2} alignItems={'center'}>
 
@@ -179,7 +230,7 @@ export default function Home() {
                 <Typography variant={'h3'} color={'#333'} textAlign={'center'} justifyContent={'center'}>
                   {quantity}
                 </Typography>
-                <Button variant="contained" color="success" onClick={() => addItem(name)}>
+                <Button variant="contained" color="success" onClick={() => addItem(name,1)}>
                   <Typography variant={'h3'}>+</Typography>
                 </Button>
               </Stack>
